@@ -58,7 +58,3 @@ For production use, make sure to:
 1. Change the default admin password
 2. Update the secret key in app.py
 3. Consider using a more robust database like PostgreSQL
-
-## License
-
-This project is licensed under the MIT License.
