@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}View Case - Dental Laboratory Tracking System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Case Details</h1>
+    <div>
+        <a href="{{ url_for('cases') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Cases
+        </a>
+        <a href="{{ url_for('edit_case', case_id=case.id) }}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Edit Case
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Patient and Doctor Information</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="fw-bold">Patient</h6>
+                <p class="fs-5">{{ case.patient_first_name }} {{ case.patient_last_name }}</p>
+            </div>
+            <div class="col-md-6">
+                <h6 class="fw-bold">Doctor</h6>
+                <p class="fs-5">{{ case.doctor_name }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Case Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h6 class="fw-bold">Case Status</h6>
+                        <span class="badge {% if case.case_status == 'Try-in' %}bg-warning text-dark{% else %}bg-secondary{% endif %} fs-6 p-2">
+                            {{ case.case_status }}
+                        </span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="fw-bold">Location Status</h6>
+                        <span class="badge {% if case.location_status == 'In-Lab' %}bg-success{% else %}bg-info{% endif %} fs-6 p-2">
+                            {{ case.location_status }}
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Date Received</h6>
+                        <p>{{ case.date_received.strftime('%Y-%m-%d') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Date Due</h6>
+                        <p {% if case.date_due < now.date() and case.location_status == 'In-Lab' %}class="text-danger fw-bold"{% endif %}>
+                            {{ case.date_due.strftime('%Y-%m-%d') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Teeth Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Shade</h6>
+                        <p>{{ case.shade or 'Not specified' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Size</h6>
+                        <p>{{ case.size or 'Not specified' }}</p>
+                    </div>
+                </div>
+                
+                <h6 class="fw-bold">Teeth Numbers</h6>
+                {% if case.teeth_numbers == 'Full Clearance' %}
+                <p>Full Clearance</p>
+                {% elif case.teeth_numbers %}
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            {% set teeth_list = case.teeth_numbers.split(',') %}
+                            {% for i in range(1, 33) %}
+                                <div class="col-1 text-center mb-2">
+                                    <span class="badge {% if i|string in teeth_list %}bg-primary{% else %}bg-light text-dark{% endif %}">
+                                        {{ i }}
+                                    </span>
+                                </div>
+                                {% if i == 16 %}
+                                    <div class="w-100 mb-3"></div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <p>No teeth specified</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if case.notes %}
+<div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">Notes</h5>
+    </div>
+    <div class="card-body">
+        <p>{{ case.notes|nl2br }}</p>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Case Timeline</h5>
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <i class="bi bi-plus-circle text-success me-2"></i>
+                        <strong>Case Created</strong>
+                    </div>
+                    <span class="text-muted">{{ case.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+            </li>
+            {% if case.updated_at != case.created_at %}
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <i class="bi bi-pencil text-warning me-2"></i>
+                        <strong>Case Updated</strong>
+                    </div>
+                    <span class="text-muted">{{ case.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function now() {
+        return new Date();
+    }
+</script>
+{% endblock %}

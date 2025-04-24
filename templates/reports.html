@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - Dental Laboratory Tracking System{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Generate Reports</h1>
+
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Report Criteria</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('generate_report') }}" target="_blank">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="doctor" class="form-label">Doctor</label>
+                    <select class="form-select" id="doctor" name="doctor">
+                        <option value="All">All Doctors</option>
+                        {% for doctor in doctors %}
+                        <option value="{{ doctor[0] }}">{{ doctor[0] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="case_status" class="form-label">Case Status</label>
+                    <select class="form-select" id="case_status" name="case_status">
+                        <option value="All">All Statuses</option>
+                        <option value="Try-in">Try-in</option>
+                        <option value="Finish">Finish</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="location_status" class="form-label">Location Status</label>
+                    <select class="form-select" id="location_status" name="location_status">
+                        <option value="All">All Locations</option>
+                        <option value="In-Lab">In-Lab</option>
+                        <option value="Sent">Sent</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="report_type" class="form-label">Date Type</label>
+                    <select class="form-select" id="report_type" name="report_type">
+                        <option value="received">Date Received</option>
+                        <option value="due">Date Due</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="date_from" class="form-label">Date From</label>
+                    <input type="date" class="form-control" id="date_from" name="date_from">
+                </div>
+                <div class="col-md-6">
+                    <label for="date_to" class="form-label">Date To</label>
+                    <input type="date" class="form-control" id="date_to" name="date_to">
+                </div>
+            </div>
+            
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-file-earmark-pdf"></i> Generate PDF Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Quick Reports</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Cases Due Today</h5>
+                        <p class="card-text">Generate a report of all cases due today.</p>
+                        <form method="POST" action="{{ url_for('generate_report') }}" target="_blank">
+                            <input type="hidden" name="location_status" value="In-Lab">
+                            <input type="hidden" name="report_type" value="due">
+                            <input type="hidden" name="date_from" value="{{ now.strftime('%Y-%m-%d') }}">
+                            <input type="hidden" name="date_to" value="{{ now.strftime('%Y-%m-%d') }}">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-file-earmark-pdf"></i> Generate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Overdue Cases</h5>
+                        <p class="card-text">Generate a report of all overdue cases still in the lab.</p>
+                        <form method="POST" action="{{ url_for('generate_report') }}" target="_blank">
+                            <input type="hidden" name="location_status" value="In-Lab">
+                            <input type="hidden" name="report_type" value="due">
+                            <input type="hidden" name="date_to" value="{{ (now - timedelta(days=1)).strftime('%Y-%m-%d') }}">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-file-earmark-pdf"></i> Generate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Cases Received This Week</h5>
+                        <p class="card-text">Generate a report of all cases received in the current week.</p>
+                        <form method="POST" action="{{ url_for('generate_report') }}" target="_blank">
+                            <input type="hidden" name="report_type" value="received">
+                            <input type="hidden" name="date_from" value="{{ (now - timedelta(days=now.weekday())).strftime('%Y-%m-%d') }}">
+                            <input type="hidden" name="date_to" value="{{ now.strftime('%Y-%m-%d') }}">
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="bi bi-file-earmark-pdf"></i> Generate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function now() {
+        return new Date();
+    }
+    
+    function timedelta(days) {
+        const date = new Date();
+        date.setDate(date.getDate() - days);
+        return date;
+    }
+</script>
+{% endblock %}

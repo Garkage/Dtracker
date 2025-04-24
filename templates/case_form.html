@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if case %}Edit Case{% else %}New Case{% endif %} - Dental Laboratory Tracking System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .teeth-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+    .tooth-checkbox {
+        text-align: center;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .tooth-checkbox input {
+        margin-right: 5px;
+    }
+    .upper-teeth {
+        margin-bottom: 20px;
+    }
+    .teeth-divider {
+        border-top: 2px dashed #ccc;
+        margin: 10px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{% if case %}Edit Case{% else %}New Case{% endif %}</h1>
+    <a href="{{ url_for('cases') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Cases
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Case Information</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" {% if case %}action="{{ url_for('edit_case', case_id=case.id) }}"{% else %}action="{{ url_for('new_case') }}"{% endif %}>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="doctor_name" class="form-label">Doctor Name</label>
+                    <input type="text" class="form-control" id="doctor_name" name="doctor_name" list="doctor_list" value="{{ case.doctor_name if case else '' }}" required>
+                    <datalist id="doctor_list">
+                        {% for doctor in doctors %}
+                        <option value="{{ doctor[0] }}"></option>
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col">
+                            <label for="patient_first_name" class="form-label">Patient First Name</label>
+                            <input type="text" class="form-control" id="patient_first_name" name="patient_first_name" value="{{ case.patient_first_name if case else '' }}" required>
+                        </div>
+                        <div class="col">
+                            <label for="patient_last_name" class="form-label">Patient Last Name</label>
+                            <input type="text" class="form-control" id="patient_last_name" name="patient_last_name" value="{{ case.patient_last_name if case else '' }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="shade" class="form-label">Shade</label>
+                    <input type="text" class="form-control" id="shade" name="shade" value="{{ case.shade if case else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label for="size" class="form-label">Size</label>
+                    <input type="text" class="form-control" id="size" name="size" value="{{ case.size if case else '' }}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="date_received" class="form-label">Date Received</label>
+                    <input type="date" class="form-control" id="date_received" name="date_received" value="{{ case.date_received.strftime('%Y-%m-%d') if case else '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="date_due" class="form-label">Date Due</label>
+                    <input type="date" class="form-control" id="date_due" name="date_due" value="{{ case.date_due.strftime('%Y-%m-%d') if case else '' }}" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Case Status</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="case_status" id="try_in" value="Try-in" {% if case and case.case_status == 'Try-in' %}checked{% elif not case %}checked{% endif %}>
+                        <label class="form-check-label" for="try_in">Try-in</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="case_status" id="finish" value="Finish" {% if case and case.case_status == 'Finish' %}checked{% endif %}>
+                        <label class="form-check-label" for="finish">Finish</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Location Status</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="location_status" id="in_lab" value="In-Lab" {% if case and case.location_status == 'In-Lab' %}checked{% elif not case %}checked{% endif %}>
+                        <label class="form-check-label" for="in_lab">In-Lab</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="location_status" id="sent" value="Sent" {% if case and case.location_status == 'Sent' %}checked{% endif %}>
+                        <label class="form-check-label" for="sent">Sent</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Teeth Selection</label>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="full_clearance" name="full_clearance" {% if case and case.teeth_numbers == 'Full Clearance' %}checked{% endif %}>
+                    <label class="form-check-label" for="full_clearance">Full Clearance</label>
+                </div>
+                
+                <div id="teeth_selection" {% if case and case.teeth_numbers == 'Full Clearance' %}style="display: none;"{% endif %}>
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">Upper Teeth (1-16)</div>
+                        <div class="card-body">
+                            <div class="teeth-grid upper-teeth">
+                                {% for i in range(1, 9) %}
+                                <div class="tooth-checkbox">
+                                    <input type="checkbox" id="tooth_{{ i }}" name="tooth_{{ i }}" {% if case and case.teeth_numbers and (i|string) in case.teeth_numbers.split(',') %}checked{% endif %}>
+                                    <label for="tooth_{{ i }}">{{ i }}</label>
+                                </div>
+                                {% endfor %}
+                                {% for i in range(9, 17) %}
+                                <div class="tooth-checkbox">
+                                    <input type="checkbox" id="tooth_{{ i }}" name="tooth_{{ i }}" {% if case and case.teeth_numbers and (i|string) in case.teeth_numbers.split(',') %}checked{% endif %}>
+                                    <label for="tooth_{{ i }}">{{ i }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-light">Lower Teeth (17-32)</div>
+                        <div class="card-body">
+                            <div class="teeth-grid lower-teeth">
+                                {% for i in range(17, 25) %}
+                                <div class="tooth-checkbox">
+                                    <input type="checkbox" id="tooth_{{ i }}" name="tooth_{{ i }}" {% if case and case.teeth_numbers and (i|string) in case.teeth_numbers.split(',') %}checked{% endif %}>
+                                    <label for="tooth_{{ i }}">{{ i }}</label>
+                                </div>
+                                {% endfor %}
+                                {% for i in range(25, 33) %}
+                                <div class="tooth-checkbox">
+                                    <input type="checkbox" id="tooth_{{ i }}" name="tooth_{{ i }}" {% if case and case.teeth_numbers and (i|string) in case.teeth_numbers.split(',') %}checked{% endif %}>
+                                    <label for="tooth_{{ i }}">{{ i }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3">{{ case.notes if case else '' }}</textarea>
+            </div>
+
+            <div class="text-end">
+                <a href="{{ url_for('cases') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">{% if case %}Update{% else %}Save{% endif %} Case</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fullClearanceCheckbox = document.getElementById('full_clearance');
+        const teethSelection = document.getElementById('teeth_selection');
+        
+        fullClearanceCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                teethSelection.style.display = 'none';
+                // Uncheck all teeth checkboxes
+                const teethCheckboxes = document.querySelectorAll('#teeth_selection input[type="checkbox"]');
+                teethCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            } else {
+                teethSelection.style.display = 'block';
+            }
+        });
+    });
+</script>
+{% endblock %}

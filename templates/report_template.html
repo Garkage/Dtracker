@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dental Laboratory Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        .header p {
+            margin-top: 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .report-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .report-info p {
+            margin: 5px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .try-in {
+            background-color: #f39c12;
+            color: #000;
+        }
+        .finish {
+            background-color: #7f8c8d;
+        }
+        .in-lab {
+            background-color: #2ecc71;
+        }
+        .sent {
+            background-color: #3498db;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dental Laboratory Case Report</h1>
+        <p>Generated on: {{ generated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+    
+    <div class="report-info">
+        <p><strong>Doctor:</strong> {{ doctor }}</p>
+        <p><strong>Case Status:</strong> {{ case_status }}</p>
+        <p><strong>Location Status:</strong> {{ location_status }}</p>
+        <p><strong>Date Range ({{ 'Received' if report_type == 'received' else 'Due' }}):</strong> 
+            {% if date_from and date_to %}
+                {{ date_from }} to {{ date_to }}
+            {% elif date_from %}
+                From {{ date_from }}
+            {% elif date_to %}
+                Until {{ date_to }}
+            {% else %}
+                All dates
+            {% endif %}
+        </p>
+        <p><strong>Total Cases:</strong> {{ cases|length }}</p>
+    </div>
+    
+    {% if cases %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Date Received</th>
+                <th>Date Due</th>
+                <th>Status</th>
+                <th>Teeth</th>
+                <th>Shade/Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for case in cases %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ case.patient_first_name }} {{ case.patient_last_name }}</td>
+                <td>{{ case.doctor_name }}</td>
+                <td>{{ case.date_received.strftime('%Y-%m-%d') }}</td>
+                <td>{{ case.date_due.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <span class="status-badge {{ 'try-in' if case.case_status == 'Try-in' else 'finish' }}">
+                        {{ case.case_status }}
+                    </span>
+                    <span class="status-badge {{ 'in-lab' if case.location_status == 'In-Lab' else 'sent' }}">
+                        {{ case.location_status }}
+                    </span>
+                </td>
+                <td>{{ case.teeth_numbers }}</td>
+                <td>{{ case.shade or '-' }} / {{ case.size or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No cases found matching the selected criteria.</p>
+    {% endif %}
+    
+    <div class="footer">
+        <p>Dental Laboratory Tracking System &copy; {{ generated_at.year }}</p>
+    </div>
+</body>
+</html>

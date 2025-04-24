@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Dental Laboratory Tracking System{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total Cases</h5>
+                <h2 class="display-4">{{ total_cases }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title">In Lab</h5>
+                <h2 class="display-4">{{ in_lab_cases }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title">Sent to Dentist</h5>
+                <h2 class="display-4">{{ sent_cases }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body">
+                <h5 class="card-title">Try-in Cases</h5>
+                <h2 class="display-4">{{ try_in_cases }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card bg-secondary text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title">Finish Cases</h5>
+                <h2 class="display-4">{{ finish_cases }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Due Today ({{ due_today|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if due_today %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for case in due_today %}
+                            <tr>
+                                <td>{{ case.patient_first_name }} {{ case.patient_last_name }}</td>
+                                <td>{{ case.doctor_name }}</td>
+                                <td>
+                                    <span class="badge {% if case.case_status == 'Try-in' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                        {{ case.case_status }}
+                                    </span>
+                                    <span class="badge {% if case.location_status == 'In-Lab' %}bg-success{% else %}bg-info{% endif %}">
+                                        {{ case.location_status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('view_case', case_id=case.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center my-3">No cases due today</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Overdue Cases ({{ overdue|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if overdue %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Due Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for case in overdue %}
+                            <tr>
+                                <td>{{ case.patient_first_name }} {{ case.patient_last_name }}</td>
+                                <td>{{ case.doctor_name }}</td>
+                                <td>{{ case.date_due.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <a href="{{ url_for('view_case', case_id=case.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center my-3">No overdue cases</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

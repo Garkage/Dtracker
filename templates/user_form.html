@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if user %}Edit User{% else %}New User{% endif %} - Dental Laboratory Tracking System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{% if user %}Edit User{% else %}New User{% endif %}</h1>
+    <a href="{{ url_for('admin') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Users
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">User Information</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" {% if user %}action="{{ url_for('edit_user', user_id=user.id) }}"{% else %}action="{{ url_for('new_user') }}"{% endif %}>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ user.username if user else '' }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" {% if not user %}required{% endif %}>
+                {% if user %}
+                <div class="form-text">Leave blank to keep current password.</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" {% if user and user.is_admin %}checked{% endif %}>
+                <label class="form-check-label" for="is_admin">Administrator</label>
+                <div class="form-text">Administrators can manage users and have full access to all features.</div>
+            </div>
+            
+            <div class="text-end">
+                <a href="{{ url_for('admin') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">{% if user %}Update{% else %}Create{% endif %} User</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

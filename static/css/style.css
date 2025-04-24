@@ -1,0 +1,90 @@
+/* Main Styles for Dental Laboratory Tracking System */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}  
+
+.footer {
+    margin-top: auto;
+}
+
+/* Dashboard cards */
+.card {
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Case status badges */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Teeth selection grid */
+.teeth-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.tooth-checkbox {
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.tooth-checkbox:hover {
+    background-color: #f8f9fa;
+}
+
+/* Form styling */
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+/* Overdue and due today highlighting */
+.text-overdue {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.text-due-today {
+    color: #fd7e14;
+    font-weight: bold;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none;
+    }
+    
+    .card {
+        border: none;
+        box-shadow: none;
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 100%;
+    }
+}
